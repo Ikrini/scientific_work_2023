@@ -1,5 +1,7 @@
 import math
 from photon import *
+import json
+import random
 
 import numpy as np
 import math
@@ -31,12 +33,42 @@ import random
 3) построить зависимость отношения сигналов (числа фотонов) на разных длинах волн от глубины
 """
 
-photon = Photon(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+photon = Photon(0.13, 12, 0.8, 10, 0, 0, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0)
 
 snells_res = photon.snells_low(30, 0, 1, 1.33)
-print(snells_res)
-print(photon.at)
-print(photon.show_vars())
+#print(photon.current_orient(current={'x': 0, 'y': 0, 'z': 5}))
+
+#print(list(range(photon.count)))
+
+boundary = photon.boundary
+
+for i in range(photon.count):
+    current = photon.current_orient(current={'x': 0, 'y': 0, 'z': 0})
+    direction = photon.direction_orient(direction={'x': 0, 'y': 0, 'z': 1})
+    w = photon.w
+    while(0 <= current['x'] < boundary and 0 <= current['y'] < boundary and 0 <= current['z'] < boundary):
+        [teta, fi] = photon.angles_direction()
+        direction = photon.photons_direction(direction, teta, fi)
+        l_run = photon.free_run()
+        weight = photon.weight()
+        #current['x'] += 1
+        new_current = photon.change_orient(current, l_run, direction)
+        current['x'] += new_current['x']
+        current['y'] += new_current['y']
+        current['z'] += new_current['z']
+        if weight <= 0.0001:
+            print(f"photon was absorbed | weight of the photon = {weight}")
+        print(current)
+        with open('myfile.txt', 'w') as f:
+            print(current, file=f)
+
+
+
+
+
+
+
+
 
 
 
