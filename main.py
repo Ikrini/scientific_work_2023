@@ -33,34 +33,41 @@ import random
 3) построить зависимость отношения сигналов (числа фотонов) на разных длинах волн от глубины
 """
 
-photon = Photon(0.13, 12, 0.8, 10, 0, 0, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0)
+photon = Photon(0.15, 10, 0.8, 3, 0, 0, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15)
 
-snells_res = photon.snells_low(30, 0, 1, 1.33)
+#snells_res = photon.snells_low(30, 0, 1, 1.33)
 #print(photon.current_orient(current={'x': 0, 'y': 0, 'z': 5}))
 
 #print(list(range(photon.count)))
 
 boundary = photon.boundary
+voxels = photon.bulk() / photon.split_voxels()
+print(voxels)
 
 for i in range(photon.count):
     current = photon.current_orient(current={'x': 0, 'y': 0, 'z': 0})
     direction = photon.direction_orient(direction={'x': 0, 'y': 0, 'z': 1})
-    w = photon.w
+    #w = photon.w
+    w = 1
     while(0 <= current['x'] < boundary and 0 <= current['y'] < boundary and 0 <= current['z'] < boundary):
         [teta, fi] = photon.angles_direction()
         direction = photon.photons_direction(direction, teta, fi)
         l_run = photon.free_run()
-        weight = photon.weight()
+        #weight = photon.weight()
+        w = photon.weight(w, l_run)
         #current['x'] += 1
         new_current = photon.change_orient(current, l_run, direction)
         current['x'] += new_current['x']
         current['y'] += new_current['y']
         current['z'] += new_current['z']
-        if weight <= 0.0001:
-            print(f"photon was absorbed | weight of the photon = {weight}")
-        print(current)
-        with open('myfile.txt', 'w') as f:
-            print(current, file=f)
+       # print(current, f"\t\t\t\t weight = {w} photon = {i}")
+        # print(current, f"\t\t\t\t weight = {w} photon = {i}")
+        if w <= 0.0001:
+            print(f"photon was absorbed | weight of the photon = {w}")
+            break
+
+        #with open('myfile.txt', 'w') as f:
+        #    print(current, file=f)
 
 
 

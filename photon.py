@@ -3,7 +3,7 @@ import math
 import random
 
 class Photon():
-    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run):
+    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run, dz, dr):
         """"initiate our photons"""
         self.mua = mua                      # коэффициент поглощения
         self.mus = mus                      # коэффициент рассеяния
@@ -21,12 +21,16 @@ class Photon():
         self.ai = ai                        # угол падения
         self.at = at                        # угол преломления
         self.l_run = l_run                  # длина свободного пробега
+        self.dz = dz                        # воксель z / расстоние между линиями сетки в направление z
+        self.dr = dr                        # воксель r / расстоние между линиями сетки в направление r
+        #self.nz = nz                        # кол-во линий по направлению z
+        #self.nr = nr                        # кол-во линий по направлению r
 
     def show_vars(self):
         print(f"mua = {self.mua}, mus = {self.mus}, g = {self.g}, n1 = {self.n1}, boundary = {self.boundary},"
               f"n2 = {self.n2}, count = {self.count}, w = {self.w}, temp = {self.temp},"
               f"status = {self.status}, current = {self.current}, direction = {self.direction}"
-              f"r = {self.r}, ai = {self.ai}, at = {self.at}, l_run = {self.l_run}")
+              f"r = {self.r}, ai = {self.ai}, at = {self.at}, l_run = {self.l_run}, dz = {self.dz}, dr = {self.dr}")
 
     def current_orient(self, current):
         """текущие координаты фотона"""
@@ -39,6 +43,10 @@ class Photon():
         current['x'] = current0['x'] + l_run * direction['x']
         current['y'] = current0['y'] + l_run * direction['y']
         current['z'] = current0['z'] + l_run * direction['z']
+
+        current['x'] = abs(direction['x'])
+        current['y'] = abs(direction['y'])
+        current['z'] = abs(direction['z'])
         return current
 
     def direction_orient(self, direction):
@@ -53,7 +61,7 @@ class Photon():
             direction['x'] = math.cos(fi) * math.sin(teta)
             direction['y'] = math.sin(fi) * math.sin(teta)
             direction['z'] = np.sign(direction['z']) * math.cos(teta)
-        elif abs(direction['z']) < 0.99999:
+        elif abs(direction['z']) <= 0.99999:
             direction['x'] = ((math.sin(teta)) / math.sqrt(1 - pow(direction['z'], 2)) *
                               (direction['x'] * direction['z'] * math.cos(fi) - direction['y'] * math.sin(fi) +
                                direction['y'] * math.cos(teta)))
@@ -106,11 +114,27 @@ class Photon():
         return -math.log(1 - random.random() * 1) / (self.mus + self.mua)
         #return l_run
 
-    def weight(self):
+    def bulk(self):
+        """расчёт объёма с заданными границами(boundary)"""
+        boundary = self.boundary
+        bulk = pow(boundary, 3)
+        return bulk
+
+    def split_voxels(self):
+        """расчёт колиечства вокселей"""
+        voxel_perimeter = (self.dz + self.dr) * 2
+        return voxel_perimeter
+
+
+    def weight(self, current_w, l_run):
         """расчёт веса фотона"""
-        w0 = self.w
-        w = w0 * (self.mua /
-                 (self.mus)+(self.mua))
+        #w0 = self.w
+        #w = self.w * (self.mua /
+        #         (self.mus)+(self.mua))
+
+
+        #w = current_w * self.mua / (self.mus + self.mua)
+        w = current_w * (math.exp(-self.mua * l_run))
         return w
 
     def snells_low(self, new_ai, new_at, new_n1, new_n2):
