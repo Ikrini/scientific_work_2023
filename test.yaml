@@ -1,0 +1,19 @@
+x: 0.008942754802006278
+y: -0.0024852290651515485
+z: !!python/object/apply:numpy.core.multiarray.scalar
+- !!python/object/apply:numpy.dtype
+  args:
+  - f8
+  - false
+  - true
+  state: !!python/tuple
+  - 3
+  - <
+  - null
+  - null
+  - null
+  - -1
+  - -1
+  - 0
+- !!binary |
+  pf9avF4pjj8=

@@ -72,6 +72,16 @@ for i in range(photon.count):
         dz = photon.dz
 
         for j in range(nr):
+            [teta, fi] = photon.angles_direction()
+            direction = photon.photons_direction(direction, teta, fi)
+            l_run = photon.free_run()
+            # weight = photon.weight()
+            w = photon.weight(w, l_run)
+            # current['x'] += 1
+            new_current = photon.change_orient(current, l_run, direction)
+            current['x'] += new_current['x']
+            current['y'] += new_current['y']
+            current['z'] += new_current['z']
             for z in range(nz):
                 f[0][0] = 0
 #        """считаем вес фотона на каждом вокселе (собираем чтобы потом положить в воксель)"""
@@ -89,6 +99,9 @@ for i in range(photon.count):
                 #print([ir],[iz], end=' ')
                 f[j][z] += absorb
                 print(f[j][z], end='\n')
+                if w <= 0.0001:
+                    print(f"photon was absorbed | weight of the photon = {w}")
+                    break
 
 
         if w <= 0.0001:
