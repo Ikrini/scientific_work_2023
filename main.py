@@ -2,6 +2,7 @@ import math
 from photon import *
 import json
 import random
+from array import *
 
 import numpy as np
 import math
@@ -33,16 +34,16 @@ import random
 3) построить зависимость отношения сигналов (числа фотонов) на разных длинах волн от глубины
 """
 
-photon = Photon(0.15, 10, 0.8, 3, 0, 0, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15)
+photon = Photon(0.15, 10, 0.8, 3, 0, 0, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0, 0, 0, 0, 0, 0)
 
 #snells_res = photon.snells_low(30, 0, 1, 1.33)
 #print(photon.current_orient(current={'x': 0, 'y': 0, 'z': 5}))
 
 #print(list(range(photon.count)))
-
+#print(photon.show_vars())
 boundary = photon.boundary
 voxels = photon.bulk() / photon.split_voxels()
-print(voxels)
+#print(voxels)
 
 for i in range(photon.count):
     current = photon.current_orient(current={'x': 0, 'y': 0, 'z': 0})
@@ -60,14 +61,39 @@ for i in range(photon.count):
         current['x'] += new_current['x']
         current['y'] += new_current['y']
         current['z'] += new_current['z']
-       # print(current, f"\t\t\t\t weight = {w} photon = {i}")
         # print(current, f"\t\t\t\t weight = {w} photon = {i}")
-        if w <= 0.0001:
-            print(f"photon was absorbed | weight of the photon = {w}")
-            break
 
-        #with open('myfile.txt', 'w') as f:
-        #    print(current, file=f)
+
+        atot = photon.atot
+        nr = photon.nr
+        nz = photon.nz
+        #f = photon.f
+        f = [[0 for ii in range(nr)] for jj in range(nz)]
+        dz = photon.dz
+
+        for j in range(nr):
+            for z in range(nz):
+                f[0][0] = 0
+#        """считаем вес фотона на каждом вокселе (собираем чтобы потом положить в воксель)"""
+                absorb = w * (1 - photon.albedo)
+                w -= absorb
+                #atot += absorb
+#                """кладём вес фотона в воксель [ir][iz]"""
+                r = math.sqrt(current['x'] * current['x'] + current['y'] * current['y'])
+                #ir = (r / photon.dr) + 1
+                #iz = (abs(current['z']) / dz) + 1
+                if j >= nr:
+                    j = nr
+                if z >= nz:
+                    z = nz
+                #print([ir],[iz], end=' ')
+                f[j][z] += absorb
+                print(f[j][z], end='\n')
+
+
+        if w <= 0.0001:
+           # print(f"photon was absorbed | weight of the photon = {w}")
+            break
 
 
 

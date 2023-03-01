@@ -3,7 +3,7 @@ import math
 import random
 
 class Photon():
-    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run, dz, dr):
+    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run, dz, dr, mut, albedo, nz, nr, atot, f):
         """"initiate our photons"""
         self.mua = mua                      # коэффициент поглощения
         self.mus = mus                      # коэффициент рассеяния
@@ -23,14 +23,19 @@ class Photon():
         self.l_run = l_run                  # длина свободного пробега
         self.dz = dz                        # воксель z / расстоние между линиями сетки в направление z
         self.dr = dr                        # воксель r / расстоние между линиями сетки в направление r
-        #self.nz = nz                        # кол-во линий по направлению z
-        #self.nr = nr                        # кол-во линий по направлению r
+        self.mut = self.mua + self.mus      # общий коэффициент взаимодействия mua + mus
+        self.albedo = self.mus / self.mut   # вес уменьшающегося фотона
+        self.nz = 5                       # кол-во линий (ячеек) по направлению z
+        self.nr = 5                       # кол-во линий (ячеек) по направлению r
+        self.atot = atot                    # суммарный вес фотона
+        self.f = [[0],[0]]                         # матрица мощности флуорисценции
 
     def show_vars(self):
-        print(f"mua = {self.mua}, mus = {self.mus}, g = {self.g}, n1 = {self.n1}, boundary = {self.boundary},"
-              f"n2 = {self.n2}, count = {self.count}, w = {self.w}, temp = {self.temp},"
-              f"status = {self.status}, current = {self.current}, direction = {self.direction}"
-              f"r = {self.r}, ai = {self.ai}, at = {self.at}, l_run = {self.l_run}, dz = {self.dz}, dr = {self.dr}")
+        print(f" mua = {self.mua},\n mus = {self.mus},\n g = {self.g},\n n1 = {self.n1},\n boundary = {self.boundary},\n"
+              f" n2 = {self.n2},\n count = {self.count},\n w = {self.w},\n temp = {self.temp},\n"
+              f" status = {self.status},\n current = {self.current},\n direction = {self.direction},\n"
+              f" r = {self.r},\n ai = {self.ai},\n at = {self.at},\n l_run = {self.l_run},\n dz = {self.dz},\n dr = {self.dr},\n mut = {self.mut},\n albedo = {self.albedo},\n"
+              f" nz = {self.nz},\n nr = {self.nr}\n, atot = {self.atot},\n")
 
     def current_orient(self, current):
         """текущие координаты фотона"""
@@ -113,6 +118,18 @@ class Photon():
         """расчёт длины свободного пробега"""
         return -math.log(1 - random.random() * 1) / (self.mus + self.mua)
         #return l_run
+
+    def total_weight(self):
+        """формирование матрицы (ячеек) для заданных nz, nr"""
+        f = self.f
+        for i in range(self.nr):
+            for r in range(self.nz):
+                f[i][r] = 0.0
+                return
+                #print(i, r, end=' ')
+
+    #def absorption(self):
+    #    absorb =  * (1 - albedo);
 
     def bulk(self):
         """расчёт объёма с заданными границами(boundary)"""
