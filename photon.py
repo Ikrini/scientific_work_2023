@@ -3,7 +3,7 @@ import math
 import random
 
 class Photon():
-    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run, dz, dr, mut, albedo, nz, nr, atot, f):
+    def __init__(self, mua, mus, g, boundary, n1, n2, w, count, temp, status, current, direction, r, ai, at, l_run, dx, dy, dz, mut, albedo, nz, nr, N, atot):
         """"initiate our photons"""
         self.mua = mua                      # коэффициент поглощения
         self.mus = mus                      # коэффициент рассеяния
@@ -21,14 +21,19 @@ class Photon():
         self.ai = ai                        # угол падения
         self.at = at                        # угол преломления
         self.l_run = l_run                  # длина свободного пробега
-        self.dz = dz                        # воксель z / расстоние между линиями сетки в направление z
-        self.dr = dr                        # воксель r / расстоние между линиями сетки в направление r
+        self.dx = dx                        # воксель x / расстоние между линиями сетки в направление x
+        self.dy = dy                        # воксель x / расстоние между линиями сетки в направление x
+        self.dz = dz                        # воксель r / расстоние между линиями сетки в направление r
         self.mut = self.mua + self.mus      # общий коэффициент взаимодействия mua + mus
         self.albedo = self.mus / self.mut   # вес уменьшающегося фотона
-        self.nz = 5                       # кол-во линий (ячеек) по направлению z
-        self.nr = 5                       # кол-во линий (ячеек) по направлению r
+        self.nx = 5                         # кол-во линий (ячеек) по направлению x
+        #self.nr = 5                       # кол-во линий (ячеек) по направлению r
+        self.N = 101
+        self.NX = N
+        self.NY = N
+        self.NZ = N
         self.atot = atot                    # суммарный вес фотона
-        self.f = [[0],[0]]                         # матрица мощности флуорисценции
+        #self.f = [[0],[0]]                         # матрица мощности флуорисценции
 
     def show_vars(self):
         print(f" mua = {self.mua},\n mus = {self.mus},\n g = {self.g},\n n1 = {self.n1},\n boundary = {self.boundary},\n"
@@ -131,7 +136,7 @@ class Photon():
     #def absorption(self):
     #    absorb =  * (1 - albedo);
 
-    def bulk(self):
+    def bulk(self, boundary):
         """расчёт объёма с заданными границами(boundary)"""
         boundary = self.boundary
         bulk = pow(boundary, 3)
@@ -139,7 +144,7 @@ class Photon():
 
     def split_voxels(self):
         """расчёт колиечства вокселей"""
-        voxel_perimeter = (self.dz + self.dr) * 2
+        voxel_perimeter = (self.dx * 2)
         return voxel_perimeter
 
 
