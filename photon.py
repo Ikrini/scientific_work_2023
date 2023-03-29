@@ -28,7 +28,7 @@ class Photon():
         self.albedo = self.mus / self.mut   # вес уменьшающегося фотона
         self.nx = 5                         # кол-во линий (ячеек) по направлению x
         #self.nr = 5                       # кол-во линий (ячеек) по направлению r
-        self.N = 101
+        self.N = N
         self.NX = N
         self.NY = N
         self.NZ = N
@@ -54,9 +54,9 @@ class Photon():
         current['y'] = current0['y'] + l_run * direction['y']
         current['z'] = current0['z'] + l_run * direction['z']
 
-        current['x'] = abs(direction['x'])
-        current['y'] = abs(direction['y'])
-        current['z'] = abs(direction['z'])
+        #current['x'] = direction['x']
+        #current['y'] = direction['y']
+        #current['z'] = direction['z']
         return current
 
     def direction_orient(self, direction):
@@ -97,8 +97,8 @@ class Photon():
             teta = (2 * random.random()) - 1
         elif (self.g > 0):
             teta = 1 / (2 * self.g) * (1 + math.pow(self.g, 2) -
-                      math.pow( (1 - self.g * self.g) / 1 - self.g + 2 * self.g * random.random(), 2) )
-        return [math.cos(teta), fi]
+                      math.pow( (1 - self.g * self.g) / (1 - self.g + 2 * self.g * random.random()), 2) )
+        return [math.acos(teta), fi]
 
 #    def reflection(self):
 #        """отражение фотона на границе раздела сред, имеющих разные показатели преломления"""
@@ -121,7 +121,7 @@ class Photon():
 
     def free_run(self):
         """расчёт длины свободного пробега"""
-        return -math.log(1 - random.random() * 1) / (self.mus + self.mua)
+        return -math.log(1 - random.random()) * (1 / (self.mus + self.mua))
         #return l_run
 
     def total_weight(self):

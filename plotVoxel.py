@@ -1,31 +1,35 @@
-# Import all the necessary libraries and packages in the code
 import matplotlib.pyplot as plt
 import numpy as np
-# Defining the user-defined cubes() function
-def cubes(side):
-    # задаём размер оси
-    x, y, z = np.indices((10 10, 10))
-    # длина стороны куба
-    cube = (x < side) & (y < side) & (z < side)
-    # форма
-    voxelarray = cube
-    # цвет вокселей
-    colors = np.empty(voxelarray.shape, dtype=object)
-    # цвет куба
-    colors[cube] = 'green'
-    # оси
-    ax = plt.figure(figsize=(10, 10)).add_subplot(projection='3d')
-    # построение куба
-    ax.voxels(voxelarray , facecolors=colors, edgecolor='k')
-    # загаловок
-    plt.title("Трёхмерный куб разбитый на воксели")
-    # показать заголовок
-    plt.show()
 
 
-def main():
-    # размер куба
-    sides = 9
-    cubes(sides)
-if __name__ == "__main__":
-    main ()
+def func3(x, y):
+    return (1 - x / 1 + x**5 + y**3) * np.exp(-(x**2 + y**2))
+
+
+# make these smaller to increase the resolution
+dx, dy = 0.05, 0.05
+
+x = np.arange(-3.0, 3.0, dx)
+y = np.arange(-3.0, 3.0, dy)
+X, Y = np.meshgrid(x, y)
+
+# when layering multiple images, the images need to have the same
+# extent.  This does not mean they need to have the same shape, but
+# they both need to render to the same coordinate system determined by
+# xmin, xmax, ymin, ymax.  Note if you use different interpolations
+# for the images their apparent extent could be different due to
+# interpolation edge effects
+
+extent = np.min(x), np.max(x), np.min(y), np.max(y)
+fig = plt.figure(frameon=False)
+
+Z1 = np.add.outer(range(1), range(1)) % 2  # chessboard
+im1 = plt.imshow(Z1, cmap=plt.cm.gray, interpolation='nearest',
+                 extent=extent)
+
+Z2 = func3(X, Y)
+
+im2 = plt.imshow(Z2, cmap=plt.cm.viridis, alpha=.9, interpolation='bilinear',
+                 extent=extent)
+
+plt.show()
