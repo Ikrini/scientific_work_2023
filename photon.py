@@ -72,13 +72,13 @@ class Photon():
             direction['y'] = math.sin(fi) * math.sin(teta)
             direction['z'] = np.sign(direction['z']) * math.cos(teta)
         elif abs(direction['z']) <= 0.99999:
-            direction['x'] = ((math.sin(teta)) / math.sqrt(1 - pow(direction['z'], 2)) *
+            direction['x'] = (math.sin(teta) / (math.sqrt(1 - pow(direction['z'], 2))) *
                               (direction['x'] * direction['z'] * math.cos(fi) - direction['y'] * math.sin(fi) +
                                direction['y'] * math.cos(teta)))
-            direction['y'] = ((math.sin(teta)) / math.sqrt(1 - pow(direction['z'], 2)) *
+            direction['y'] = (math.sin(teta) / (math.sqrt(1 - pow(direction['z'], 2))) *
                               (direction['x'] * direction['z'] * math.cos(fi) + direction['y'] * math.sin(fi) +
                                direction['y'] * math.cos(teta)))
-            direction['z'] = (-math.sin(teta) * math.cos(fi) * math.sqrt(1 - pow(direction['z'], 2)) + direction['z'] * math.cos(teta))
+            direction['z'] = (-math.sin(teta) * math.cos(fi) * math.sqrt(1 - pow(direction['z'], 2)) + (direction['z'] * math.cos(teta)))
 
             #direction['x'] = abs(direction['x'])
             #direction['y'] = abs(direction['y'])
@@ -96,8 +96,7 @@ class Photon():
         if(self.g == 0):
             teta = (2 * random.random()) - 1
         elif (self.g > 0):
-            teta = 1 / (2 * self.g) * (1 + math.pow(self.g, 2) -
-                      math.pow( (1 - self.g * self.g) / (1 - self.g + 2 * self.g * random.random()), 2) )
+            teta = 1 / (2 * self.g) * (1 + math.pow(self.g, 2) - math.pow( (1 - self.g * self.g) / (1 - self.g + 2 * self.g * random.random()), 2) )
         return [math.acos(teta), fi]
 
 #    def reflection(self):
@@ -124,14 +123,6 @@ class Photon():
         return -math.log(1 - random.random()) * (1 / (self.mus + self.mua))
         #return l_run
 
-    def total_weight(self):
-        """формирование матрицы (ячеек) для заданных nz, nr"""
-        f = self.f
-        for i in range(self.nr):
-            for r in range(self.nz):
-                f[i][r] = 0.0
-                return
-                #print(i, r, end=' ')
 
     #def absorption(self):
     #    absorb =  * (1 - albedo);
@@ -155,9 +146,52 @@ class Photon():
         #         (self.mus)+(self.mua))
 
 
-        #w = current_w * self.mua / (self.mus + self.mua)
-        w = current_w * (math.exp(-self.mua * l_run))
+        w = current_w * self.mua / (self.mus + self.mua)
+        #w = current_w * (math.exp(-self.mua * l_run))
         return w
+
+
+    def SameVoxel(self, x1, y1, z1, x2, y2, z2, dx, dy, dz):
+        xmin = min((math.floor)(x1/dx), (math.floor)(x2/dx))*dx
+        ymin = min((math.floor)(y1/dy), (math.floor)(y2/dy))*dy
+        zmin = min((math.floor)(z1/dz), (math.floor)(z2/dz))*dz
+        xmax = xmin+dx
+        ymax = ymin+dy
+        zmax = zmin+dz
+
+        sv = (x1 <= xmax and x2 <= xmax and y1 <= ymax and y2 <= ymax and z1 < zmax and z2 <= zmax)
+        return sv
+
+
+    def findVoxel(self, x1, y1, z1,  x2,  y2,  z2, dx, dy, dz,  ux,  uy,  uz):
+
+        ix1 = math.floor(x1/dx)
+        iy1 = math.floor(y1/dy)
+        iz1 = math.floor(z1/dz)
+
+        if ux>=0:
+            ix2=ix1+1
+        else:
+            ix2 = ix1
+
+        if uy>=0:
+            iy2=iy1+1
+        else:
+            iy2 = iy1
+
+        if uz >= 0:
+            iz2 = iz1+1
+        else:
+            iz2 = iz1
+
+        xs = abs((ix2*dx - x1)/ux)
+        ys = abs((iy2*dy - y1)/uy)
+        zs = abs((iz2*dz - z1)/uz)
+
+        s = min(xs, ys, zs)
+
+        return s
+
 
     def snells_low(self, new_ai, new_at, new_n1, new_n2):
         self.ai = new_ai    # theta_1
