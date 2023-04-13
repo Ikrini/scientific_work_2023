@@ -3,10 +3,13 @@ from photon import *
 import json
 import random
 from array import *
+import matplotlib.pyplot as plt
 
 import numpy as np
 import math
 import random
+import vox
+#import test2
 
 #a, b = map(int, input().split())
 #print(math.sqrt((a**2)+(b**2)))
@@ -34,7 +37,7 @@ import random
 3) построить зависимость отношения сигналов (числа фотонов) на разных длинах волн от глубины
 """
 
-photon = Photon(0.15, 10, 0.8, 100, 0, 0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0.15, 0, 0, 0, 0, 101, 0)
+photon = Photon(0.15, 10, 0.8, 100, 0, 0, 1, 100000, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0.15, 0, 0, 0, 0, 101, 0)
 
 #snells_res = photon.snells_low(30, 0, 1, 1.33)
 #print(photon.current_orient(current={'x': 0, 'y': 0, 'z': 5}))
@@ -48,6 +51,7 @@ left = -(boundary/2)
 right = boundary/2
 
 array_current = []
+nn = 10
 
 voksels = 100
 voksel = boundary / voksels
@@ -73,7 +77,7 @@ for i in range(photon.count):
         current['x'] += new_current['x']
         current['y'] += new_current['y']
         current['z'] += new_current['z']
-        #print(current, f"\t\t\t\t weight = {w} photon = {i}")
+        print(current, f"\t\t\t\t weight = {w} photon = {i}")
         #print(direction, f"\t\t\t\t weight = {w} photon = {i}")
         #atot = photon.atot
         if w <= 0.0001:
@@ -94,6 +98,66 @@ for i in range(len(array_voksel)):
     if (array_voksel[i][3] != 0):
         print(array_voksel[i])
 
+def explode(data):
+    size = np.array(data.shape)*2
+    data_e = np.zeros(size - 1, dtype=data.dtype)
+    data_e[::2, ::2, ::2] = data
+    return data_e
+
+# build up the numpy logo
+n_voxels = np.zeros((nn, nn, nn), dtype=bool)
+#print(n_voxels)
+for i in range(len(array_voksel)):
+        if (array_voksel[i][3] != 0):
+            n_voxels[int(array_voksel[i][3]), int(array_voksel[i][3]),
+                     int(array_voksel[i][3])] = True
+            print(array_voksel[i][3])
+
+#n_voxels[1, 0, 0] = True
+
+# Control Transparency
+alpha = 0.9
+#colors = np.empty(n_voxels, dtype=np.float32)
+#colors[0] = [1, 0, 0, alpha]
+facecolors = np.where(n_voxels, '#FFD65DC0', '#7A88CCC0')
+edgecolors = np.where(n_voxels, '#BFAB6E', '#7D84A6')
+filled = np.ones(n_voxels.shape)
+
+# upscale the above voxel image, leaving gaps
+filled_2 = explode(filled)
+fcolors_2 = explode(facecolors)
+ecolors_2 = explode(edgecolors)
+
+# Shrink the gaps
+x, y, z = np.indices(np.array(filled_2.shape) + 1).astype(float) // 2
+#print(x,y,z)
+x[0::2, :, :] += 0.95
+y[:, 0::2, :] += 0.95
+z[:, :, 0::2] += 0.95
+
+#---------
+#size of the voxels
+#x[1::2, :, :] += 0.1
+#y[:, 1::2, :] += 0.1
+#z[:, :, 1::2] += 0.1
+
+
+
+#---------
+
+#x[1::2, :, :] += 0.95
+#y[:, 1::2, :] += 0.95
+#z[:, :, 1::2] += 0.95
+
+fig = plt.figure()
+
+ax = fig.add_subplot(projection='3d')
+#ax.set_xlim(-5,5)
+#ax.set_ylim(-5,5)
+#ax.set_zlim(-5,5)
+ax.voxels(x, y, z, filled_2, facecolors=fcolors_2, edgecolors=ecolors_2)
+
+plt.show()
 
 
 
