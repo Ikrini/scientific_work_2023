@@ -67,18 +67,21 @@ class Photon():
     def photons_direction(self, direction, teta, fi):
         """"направление движение фотона"""
         self.direction = direction
+        
         if abs(direction['z']) > 0.99999:
             direction['x'] = math.cos(fi) * math.sin(teta)
             direction['y'] = math.sin(fi) * math.sin(teta)
             direction['z'] = np.sign(direction['z']) * math.cos(teta)
-        elif abs(direction['z']) <= 0.99999:
+        else:
             direction['x'] = (math.sin(teta) / (math.sqrt(1 - pow(direction['z'], 2))) *
-                              (direction['x'] * direction['z'] * math.cos(fi) - direction['y'] * math.sin(fi) +
-                               direction['y'] * math.cos(teta)))
+                              (direction['x'] * direction['z'] * math.cos(fi) - direction['y'] * math.sin(fi)) +
+                              (direction['y'] * math.cos(teta)))
             direction['y'] = (math.sin(teta) / (math.sqrt(1 - pow(direction['z'], 2))) *
-                              (direction['x'] * direction['z'] * math.cos(fi) + direction['y'] * math.sin(fi) +
-                               direction['y'] * math.cos(teta)))
-            direction['z'] = (-math.sin(teta) * math.cos(fi) * math.sqrt(1 - pow(direction['z'], 2)) + (direction['z'] * math.cos(teta)))
+                              (direction['x'] * direction['z'] * math.cos(fi) + direction['y'] * math.sin(fi)) +
+                              (direction['y'] * math.cos(teta)))
+            direction['z'] = (-math.sin(teta) * math.cos(fi) * math.sqrt(1 -
+                              pow(direction['z'], 2)) + (direction['z'] * math.cos(teta)))
+            
 
             #direction['x'] = abs(direction['x'])
             #direction['y'] = abs(direction['y'])
@@ -93,10 +96,11 @@ class Photon():
         """"углы для нахождения направления движения фотона"""
         teta = 0                                    # cos teta
         fi = (math.pi*2)*random.random()            # Угол Фи
-        if(self.g == 0):
+        if (self.g == 0):
             teta = (2 * random.random()) - 1
         elif (self.g > 0):
-            teta = 1 / (2 * self.g) * (1 + math.pow(self.g, 2) - math.pow( (1 - self.g * self.g) / (1 - self.g + 2 * self.g * random.random()), 2) )
+            teta = 1 / (2 * self.g) * (1 + math.pow(self.g, 2) - math.pow((1 -
+                                                                           math.pow(self.g, 2)) / (1 - self.g + 2 * self.g * random.random()), 2))
         return [math.acos(teta), fi]
 
 #    def reflection(self):
@@ -146,7 +150,7 @@ class Photon():
         #         (self.mus)+(self.mua))
 
 
-        w = current_w * self.mua / (self.mus + self.mua)
+        w = current_w * (self.mus / (self.mus + self.mua))
         #w = current_w * (math.exp(-self.mua * l_run))
         return w
 
